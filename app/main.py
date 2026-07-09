@@ -53,13 +53,17 @@ def root():
 
 @app.get("/sqlalchemy")
 def test_posts(db: Session = Depends(get_db)):
-    return {"status" : "success"}
+
+    posts = db.query(models.Post)
+    print(posts)
+    return {"data" : "successful"}
 
 #request Get method url : /posts
 @app.get("/posts")
-def get_posts():
-    cursor.execute("""SELECT * FROM posts """)
-    posts = cursor.fetchall()
+def get_posts(db: Session = Depends(get_db)):
+    #cursor.execute("""SELECT * FROM posts """)
+    #posts = cursor.fetchall()
+    posts = db.query(models.Post).all()
     return {"data" : posts}
 
 
@@ -77,10 +81,11 @@ def create_post(post: Post):
 
 
 @app.get("/posts/{id}")
-def get_post(id: int, response: Response):
-    cursor.execute("""SELECT * FROM posts WHERE id = %s """, (str(id),))
-    post = cursor.fetchone()
-    
+def get_post(id: int, db: Session = Depends(get_db)):
+    #cursor.execute("""SELECT * FROM posts WHERE id = %s """, (str(id),))
+    #post = cursor.fetchone()
+    post = db.query(models.Post).filter(models.Post.id == id).first()
+    print(post)
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= f'id : {id} not found')
         #response.status_code = status.HTTP_404_NOT_FOUND
